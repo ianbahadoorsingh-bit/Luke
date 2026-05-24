@@ -1,0 +1,76 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    function isClubAdmin(courseId) {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admin_users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.courseId == courseId &&
+        get(/databases/$(database)/documents/admin_users/$(request.auth.uid)).data.role == 'club_admin';
+    }
+
+    function isAnyAdmin() {
+      return isAuthenticated() &&
+        exists(/databases/$(database)/documents/admin_users/$(request.auth.uid));
+    }
+
+    // ── Courses: public read, admin write ───────────────────────────────────
+
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write: if isSuperAdmin() || isClubAdmin(courseId);
+    }
+
+    // ── Tournaments: public read, super admin write ─────────────────────────
+
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+
+      // Registrations: any authenticated user may write (submit form)
+      // Read is restricted to the admin of the tournament's course
+      match /registrations/{registrationId} {
+        allow create: if isAuthenticated();
+        allow read, update, delete: if isSuperAdmin() ||
+          (isAuthenticated() && isAnyAdmin());
+      }
+    }
+
+    // ── Specials: public read, club admin write for own course ──────────────
+
+    match /specials/{specialId} {
+      allow read: if true;
+      allow create: if isSuperAdmin() ||
+        (isClubAdmin(request.resource.data.courseId));
+      allow update, delete: if isSuperAdmin() ||
+        (isClubAdmin(resource.data.courseId));
+    }
+
+    // ── Rules: public read, super admin write ───────────────────────────────
+
+    match /rules/{ruleId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    // ── Admin users: owner + super admin only ───────────────────────────────
+
+    match /admin_users/{userId} {
+      allow read: if request.auth.uid == userId || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+  }
+}

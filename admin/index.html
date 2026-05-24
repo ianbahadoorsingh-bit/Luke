@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caribbean Golf Hub — Pro Shop Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Login Screen ─────────────────────────────────────────────────────── -->
+  <div id="login-screen" class="screen">
+    <div class="login-card">
+      <div class="login-header">
+        <span class="logo-icon">⛳</span>
+        <h1>Caribbean Golf Hub</h1>
+        <p>Pro Shop Dashboard</p>
+      </div>
+      <form id="login-form">
+        <div class="field-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="proshop@yourclub.com" required />
+        </div>
+        <div class="field-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" required />
+        </div>
+        <p id="login-error" class="error-msg hidden"></p>
+        <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Dashboard ─────────────────────────────────────────────────────────── -->
+  <div id="dashboard-screen" class="screen hidden">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <span>⛳</span>
+        <span>CGH Admin</span>
+      </div>
+      <ul class="sidebar-nav">
+        <li class="nav-item active" data-tab="overview">
+          <span class="nav-icon">🏠</span> Overview
+        </li>
+        <li class="nav-item" data-tab="course">
+          <span class="nav-icon">🗺</span> My Course
+        </li>
+        <li class="nav-item" data-tab="specials">
+          <span class="nav-icon">🏷</span> Specials
+        </li>
+        <li class="nav-item" data-tab="registrations">
+          <span class="nav-icon">📋</span> Registrations
+        </li>
+      </ul>
+      <button id="logout-btn" class="btn btn-outline sidebar-logout">Sign Out</button>
+    </nav>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <header class="top-bar">
+        <div>
+          <h2 id="page-title">Overview</h2>
+          <p id="user-label" class="subtitle"></p>
+        </div>
+        <div id="top-bar-actions"></div>
+      </header>
+
+      <!-- ── Tab: Overview ─────────────────────────────────────────────── -->
+      <section id="tab-overview" class="tab-content active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon green">⛳</div>
+            <div>
+              <div class="stat-value" id="stat-courses">—</div>
+              <div class="stat-label">Active Courses</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon gold">🏆</div>
+            <div>
+              <div class="stat-value" id="stat-tournaments">—</div>
+              <div class="stat-label">Upcoming Tournaments</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🏷</div>
+            <div>
+              <div class="stat-value" id="stat-specials">—</div>
+              <div class="stat-label">Active Specials</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon gold">👤</div>
+            <div>
+              <div class="stat-value" id="stat-regs">—</div>
+              <div class="stat-label">Total Registrations</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Quick Actions</h3>
+          <div class="quick-actions">
+            <button class="quick-action-btn" onclick="switchTab('course')">
+              <span>✏️</span>
+              <span>Update Course Info</span>
+            </button>
+            <button class="quick-action-btn" onclick="switchTab('specials')">
+              <span>➕</span>
+              <span>Publish New Special</span>
+            </button>
+            <button class="quick-action-btn" onclick="switchTab('registrations')">
+              <span>📥</span>
+              <span>View Registrations</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab: My Course ────────────────────────────────────────────── -->
+      <section id="tab-course" class="tab-content hidden">
+        <div class="card">
+          <h3>Course Information</h3>
+          <p class="text-muted">Update your club's contact details, amenities, and green fees.</p>
+          <div id="course-form-container">
+            <div class="spinner-wrap"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Tab: Specials ─────────────────────────────────────────────── -->
+      <section id="tab-specials" class="tab-content hidden">
+        <div class="card">
+          <div class="card-header-row">
+            <h3>Active Specials</h3>
+            <button class="btn btn-primary btn-sm" id="new-special-btn">+ Publish Special</button>
+          </div>
+          <div id="specials-list"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- Publish Special Form -->
+        <div class="card hidden" id="special-form-card">
+          <h3 id="special-form-title">Publish New Special</h3>
+          <form id="special-form">
+            <div class="form-grid">
+              <div class="field-group">
+                <label>Title</label>
+                <input type="text" id="sp-title" placeholder="e.g. Moka Twilight Special" required />
+              </div>
+              <div class="field-group">
+                <label>Price (<span id="sp-currency-label">TTD</span>)</label>
+                <input type="number" id="sp-price" placeholder="250" required />
+              </div>
+              <div class="field-group">
+                <label>Original Price (optional)</label>
+                <input type="number" id="sp-original-price" placeholder="400" />
+              </div>
+              <div class="field-group">
+                <label>Valid From</label>
+                <input type="date" id="sp-valid-from" required />
+              </div>
+              <div class="field-group">
+                <label>Valid Until</label>
+                <input type="date" id="sp-valid-to" required />
+              </div>
+              <div class="field-group span-2">
+                <label>Description</label>
+                <textarea id="sp-description" rows="3" placeholder="Describe the offer..." required></textarea>
+              </div>
+              <div class="field-group span-2">
+                <label>Tags (comma-separated)</label>
+                <input type="text" id="sp-tags" placeholder="Twilight, Cart Included, Members" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-outline" id="cancel-special-btn">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="submit-special-btn">Publish Special</button>
+            </div>
+            <p id="special-form-error" class="error-msg hidden"></p>
+          </form>
+        </div>
+      </section>
+
+      <!-- ── Tab: Registrations ────────────────────────────────────────── -->
+      <section id="tab-registrations" class="tab-content hidden">
+        <div class="card">
+          <div class="card-header-row">
+            <div>
+              <h3>Tournament Registrations</h3>
+              <p class="text-muted">View and export sign-ups for your tournament.</p>
+            </div>
+            <div class="row-gap">
+              <select id="tournament-select" class="select-input">
+                <option value="">Select a tournament...</option>
+              </select>
+              <button class="btn btn-outline btn-sm" id="export-csv-btn" disabled>⬇ Export CSV</button>
+            </div>
+          </div>
+          <div id="registrations-table-wrap">
+            <p class="text-muted text-center" style="padding:2rem">Select a tournament above to view registrations.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Firebase SDKs (v9 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
