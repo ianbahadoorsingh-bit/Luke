@@ -7,7 +7,9 @@ import '../specials/specials_screen.dart';
 import '../rules/rules_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool useMockData;
+
+  const HomeScreen({super.key, this.useMockData = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -16,11 +18,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  static const _tabs = [
-    CoursesListScreen(),
-    TournamentsScreen(),
-    SpecialsScreen(),
-    RulesScreen(),
+  List<Widget> get _tabs => [
+    CoursesListScreen(useMockData: widget.useMockData),
+    TournamentsScreen(useMockData: widget.useMockData),
+    SpecialsScreen(useMockData: widget.useMockData),
+    const RulesScreen(),
   ];
 
   @override

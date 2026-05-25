@@ -4,7 +4,9 @@ import 'core/constants/app_strings.dart';
 import 'features/home/home_screen.dart';
 
 class CaribbeanGolfHubApp extends StatelessWidget {
-  const CaribbeanGolfHubApp({super.key});
+  final bool useMockData;
+
+  const CaribbeanGolfHubApp({super.key, this.useMockData = false});
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,7 @@ class CaribbeanGolfHubApp extends StatelessWidget {
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
-      home: const HomeScreen(),
+      home: HomeScreen(useMockData: useMockData),
     );
   }
 }

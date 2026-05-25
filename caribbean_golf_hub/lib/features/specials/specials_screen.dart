@@ -10,9 +10,12 @@ import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/gold_badge.dart';
 import '../../shared/widgets/amenity_chip.dart';
+import '../../shared/services/mock_data.dart';
 
 class SpecialsScreen extends StatelessWidget {
-  const SpecialsScreen({super.key});
+  final bool useMockData;
+
+  const SpecialsScreen({super.key, this.useMockData = false});
 
   @override
   Widget build(BuildContext context) {
@@ -22,39 +25,47 @@ class SpecialsScreen extends StatelessWidget {
         subtitle: AppStrings.specialsSubtitle,
         showGoldAccent: true,
       ),
-      body: StreamBuilder<List<GolfSpecial>>(
-        stream: FirestoreService.instance.watchActiveSpecials(),
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const ShimmerList(count: 4, cardHeight: 200);
-          }
-          if (snap.hasError) {
-            return const EmptyState(
-              emoji: '⚠️',
-              title: 'Unable to load specials',
-              subtitle: 'Please check your connection',
-            );
-          }
-          final specials = snap.data ?? [];
-          if (specials.isEmpty) {
-            return const EmptyState(
-              emoji: '🏌️',
-              title: 'No active specials',
-              subtitle: 'Enable notifications to be the first to know!',
-            );
-          }
-          return RefreshIndicator(
-            color: AppColors.primaryGreen,
-            onRefresh: () async {},
-            child: ListView.separated(
+      body: useMockData
+          ? ListView.separated(
               padding: const EdgeInsets.all(16),
-              itemCount: specials.length,
+              itemCount: MockData.specials.length,
               separatorBuilder: (_, __) => const SizedBox(height: 14),
-              itemBuilder: (context, i) => _SpecialCard(special: specials[i]),
+              itemBuilder: (_, i) => _SpecialCard(special: MockData.specials[i]),
+            )
+          : StreamBuilder<List<GolfSpecial>>(
+              stream: FirestoreService.instance.watchActiveSpecials(),
+              builder: (context, snap) {
+                if (snap.connectionState == ConnectionState.waiting) {
+                  return const ShimmerList(count: 4, cardHeight: 200);
+                }
+                if (snap.hasError) {
+                  return const EmptyState(
+                    emoji: '⚠️',
+                    title: 'Unable to load specials',
+                    subtitle: 'Please check your connection',
+                  );
+                }
+                final specials = snap.data ?? [];
+                if (specials.isEmpty) {
+                  return const EmptyState(
+                    emoji: '🏌️',
+                    title: 'No active specials',
+                    subtitle: 'Enable notifications to be the first to know!',
+                  );
+                }
+                return RefreshIndicator(
+                  color: AppColors.primaryGreen,
+                  onRefresh: () async {},
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: specials.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 14),
+                    itemBuilder: (context, i) =>
+                        _SpecialCard(special: specials[i]),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

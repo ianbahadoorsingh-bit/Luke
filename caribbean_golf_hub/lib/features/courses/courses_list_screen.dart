@@ -8,10 +8,13 @@ import '../../shared/widgets/caribbean_app_bar.dart';
 import '../../shared/widgets/amenity_chip.dart';
 import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/services/mock_data.dart';
 import 'course_detail_screen.dart';
 
 class CoursesListScreen extends StatefulWidget {
-  const CoursesListScreen({super.key});
+  final bool useMockData;
+
+  const CoursesListScreen({super.key, this.useMockData = false});
 
   @override
   State<CoursesListScreen> createState() => _CoursesListScreenState();
@@ -42,42 +45,42 @@ class _CoursesListScreenState extends State<CoursesListScreen> {
             onChanged: (q) => setState(() => _searchQuery = q.toLowerCase()),
           ),
           Expanded(
-            child: StreamBuilder<List<GolfCourse>>(
-              stream: FirestoreService.instance.watchCourses(),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const ShimmerList(count: 4, cardHeight: 160);
-                }
-                if (snap.hasError) {
-                  return EmptyState(
-                    emoji: '⚠️',
-                    title: 'Unable to load courses',
-                    subtitle: 'Please check your connection',
-                  );
-                }
-                final courses = (snap.data ?? [])
-                    .where((c) =>
-                        _searchQuery.isEmpty ||
-                        c.name.toLowerCase().contains(_searchQuery) ||
-                        c.location.toLowerCase().contains(_searchQuery))
-                    .toList();
-
-                if (courses.isEmpty) {
-                  return EmptyState(
-                    emoji: '⛳',
-                    title: 'No courses found',
-                    subtitle: 'Try a different search term',
-                  );
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: courses.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, i) => _CourseCard(course: courses[i]),
-                );
-              },
-            ),
+            child: widget.useMockData
+              ? _MockCourseList(searchQuery: _searchQuery)
+              : StreamBuilder<List<GolfCourse>>(
+                  stream: FirestoreService.instance.watchCourses(),
+                  builder: (context, snap) {
+                    if (snap.connectionState == ConnectionState.waiting) {
+                      return const ShimmerList(count: 4, cardHeight: 160);
+                    }
+                    if (snap.hasError) {
+                      return EmptyState(
+                        emoji: '⚠️',
+                        title: 'Unable to load courses',
+                        subtitle: 'Please check your connection',
+                      );
+                    }
+                    final courses = (snap.data ?? [])
+                        .where((c) =>
+                            _searchQuery.isEmpty ||
+                            c.name.toLowerCase().contains(_searchQuery) ||
+                            c.location.toLowerCase().contains(_searchQuery))
+                        .toList();
+                    if (courses.isEmpty) {
+                      return EmptyState(
+                        emoji: '⛳',
+                        title: 'No courses found',
+                        subtitle: 'Try a different search term',
+                      );
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: courses.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, i) => _CourseCard(course: courses[i]),
+                    );
+                  },
+                ),
           ),
         ],
       ),
@@ -316,6 +319,30 @@ class _RatePill extends StatelessWidget {
           color: gold ? AppColors.charcoal : AppColors.primaryGreen,
         ),
       ),
+    );
+  }
+}
+
+class _MockCourseList extends StatelessWidget {
+  final String searchQuery;
+  const _MockCourseList({required this.searchQuery});
+
+  @override
+  Widget build(BuildContext context) {
+    final courses = MockData.courses
+        .where((c) =>
+            searchQuery.isEmpty ||
+            c.name.toLowerCase().contains(searchQuery) ||
+            c.location.toLowerCase().contains(searchQuery))
+        .toList();
+    if (courses.isEmpty) {
+      return const EmptyState(emoji: '⛳', title: 'No courses found');
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: courses.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, i) => _CourseCard(course: courses[i]),
     );
   }
 }

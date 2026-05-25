@@ -9,10 +9,13 @@ import '../../shared/widgets/caribbean_app_bar.dart';
 import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/amenity_chip.dart';
+import '../../shared/services/mock_data.dart';
 import 'tournament_detail_screen.dart';
 
 class TournamentsScreen extends StatefulWidget {
-  const TournamentsScreen({super.key});
+  final bool useMockData;
+
+  const TournamentsScreen({super.key, this.useMockData = false});
 
   @override
   State<TournamentsScreen> createState() => _TournamentsScreenState();
@@ -44,37 +47,39 @@ class _TournamentsScreenState extends State<TournamentsScreen> {
             onSelect: (c) => setState(() => _selectedCountry = c),
           ),
           Expanded(
-            child: StreamBuilder<List<Tournament>>(
-              stream: FirestoreService.instance
-                  .watchUpcomingTournaments(country: _selectedCountry),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const ShimmerList(count: 3, cardHeight: 200);
-                }
-                if (snap.hasError) {
-                  return const EmptyState(
-                    emoji: '⚠️',
-                    title: 'Unable to load tournaments',
-                    subtitle: 'Please check your connection',
-                  );
-                }
-                final tournaments = snap.data ?? [];
-                if (tournaments.isEmpty) {
-                  return const EmptyState(
-                    emoji: '🏆',
-                    title: 'No upcoming tournaments',
-                    subtitle: 'Check back soon for new events',
-                  );
-                }
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: tournaments.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 14),
-                  itemBuilder: (context, i) =>
-                      TournamentCard(tournament: tournaments[i]),
-                );
-              },
-            ),
+            child: widget.useMockData
+                ? _MockTournamentList(country: _selectedCountry)
+                : StreamBuilder<List<Tournament>>(
+                    stream: FirestoreService.instance
+                        .watchUpcomingTournaments(country: _selectedCountry),
+                    builder: (context, snap) {
+                      if (snap.connectionState == ConnectionState.waiting) {
+                        return const ShimmerList(count: 3, cardHeight: 200);
+                      }
+                      if (snap.hasError) {
+                        return const EmptyState(
+                          emoji: '⚠️',
+                          title: 'Unable to load tournaments',
+                          subtitle: 'Please check your connection',
+                        );
+                      }
+                      final tournaments = snap.data ?? [];
+                      if (tournaments.isEmpty) {
+                        return const EmptyState(
+                          emoji: '🏆',
+                          title: 'No upcoming tournaments',
+                          subtitle: 'Check back soon for new events',
+                        );
+                      }
+                      return ListView.separated(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: tournaments.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 14),
+                        itemBuilder: (context, i) =>
+                            TournamentCard(tournament: tournaments[i]),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -284,6 +289,27 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _MockTournamentList extends StatelessWidget {
+  final String? country;
+  const _MockTournamentList({this.country});
+
+  @override
+  Widget build(BuildContext context) {
+    final list = MockData.tournaments
+        .where((t) => country == null || t.country == country)
+        .toList();
+    if (list.isEmpty) {
+      return const EmptyState(emoji: '🏆', title: 'No upcoming tournaments');
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: list.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 14),
+      itemBuilder: (_, i) => TournamentCard(tournament: list[i]),
     );
   }
 }

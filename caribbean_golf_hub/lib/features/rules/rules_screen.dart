@@ -6,6 +6,7 @@ import '../../shared/services/firestore_service.dart';
 import '../../shared/widgets/caribbean_app_bar.dart';
 import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/services/mock_data.dart';
 import 'rule_detail_screen.dart';
 
 class RulesScreen extends StatefulWidget {
@@ -29,59 +30,7 @@ class _RulesScreenState extends State<RulesScreen> {
         children: [
           _SearchHeader(onChanged: (q) => setState(() => _searchQuery = q.toLowerCase())),
           Expanded(
-            child: StreamBuilder<List<GolfRule>>(
-              stream: FirestoreService.instance.watchAllRules(),
-              builder: (context, snap) {
-                if (snap.connectionState == ConnectionState.waiting) {
-                  return const ShimmerList(count: 5, cardHeight: 72);
-                }
-                if (snap.hasError) {
-                  return const EmptyState(
-                    emoji: '⚠️',
-                    title: 'Unable to load rules',
-                    subtitle: 'Please check your connection',
-                  );
-                }
-
-                final allRules = snap.data ?? [];
-                final filtered = _searchQuery.isEmpty
-                    ? allRules
-                    : allRules
-                        .where((r) =>
-                            r.title.toLowerCase().contains(_searchQuery) ||
-                            r.category.toLowerCase().contains(_searchQuery) ||
-                            r.summary.toLowerCase().contains(_searchQuery) ||
-                            r.ruleNumber.contains(_searchQuery))
-                        .toList();
-
-                if (filtered.isEmpty) {
-                  return const EmptyState(
-                    emoji: '📖',
-                    title: 'No rules found',
-                    subtitle: 'Try a different search term',
-                  );
-                }
-
-                // Group by category
-                final grouped = <String, List<GolfRule>>{};
-                for (final rule in filtered) {
-                  grouped.putIfAbsent(rule.category, () => []).add(rule);
-                }
-
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  itemCount: grouped.length,
-                  itemBuilder: (context, i) {
-                    final category = grouped.keys.elementAt(i);
-                    final rules = grouped[category]!;
-                    return _CategorySection(
-                      category: category,
-                      rules: rules,
-                    );
-                  },
-                );
-              },
-            ),
+            child: _RulesList(searchQuery: _searchQuery),
           ),
         ],
       ),
@@ -231,6 +180,42 @@ class _RuleTile extends StatelessWidget {
         context,
         MaterialPageRoute(builder: (_) => RuleDetailScreen(rule: rule)),
       ),
+    );
+  }
+}
+
+class _RulesList extends StatelessWidget {
+  final String searchQuery;
+  const _RulesList({required this.searchQuery});
+
+  @override
+  Widget build(BuildContext context) {
+    final allRules = MockData.rules;
+    final filtered = searchQuery.isEmpty
+        ? allRules
+        : allRules
+            .where((r) =>
+                r.title.toLowerCase().contains(searchQuery) ||
+                r.category.toLowerCase().contains(searchQuery) ||
+                r.summary.toLowerCase().contains(searchQuery))
+            .toList();
+
+    if (filtered.isEmpty) {
+      return const EmptyState(emoji: '📖', title: 'No rules found');
+    }
+
+    final grouped = <String, List<GolfRule>>{};
+    for (final rule in filtered) {
+      grouped.putIfAbsent(rule.category, () => []).add(rule);
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      itemCount: grouped.length,
+      itemBuilder: (context, i) {
+        final category = grouped.keys.elementAt(i);
+        return _CategorySection(category: category, rules: grouped[category]!);
+      },
     );
   }
 }
