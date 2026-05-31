@@ -72,6 +72,39 @@ class MockData {
         tourist: const RateTier(weekday: 35, weekend: 50),
       ),
     ),
+    GolfCourse(
+      id: 'brechin',
+      name: 'Brechin Castle Golf Club',
+      location: 'Couva, Trinidad',
+      contactNumber: '+1-868-679-3858',
+      whatsappNumber: '18686793858',
+      amenities: ['Clubhouse', 'Pro Shop', 'Bar & Restaurant', 'Locker Rooms'],
+      description:
+          'A well-maintained 9-hole course set on the grounds of the historic Brechin Castle '
+          'estate in Couva, central Trinidad. Popular with local members and open to visitors.',
+      rates: CourseRates(
+        local: const RateTier(weekday: 250, weekend: 320),
+        tourist: const RateTier(weekday: 40, weekend: 55),
+        notes: '9-hole course. Weekend replay available.',
+      ),
+    ),
+    GolfCourse(
+      id: 'chaguaramas',
+      name: 'Chaguaramas Golf Club',
+      location: 'Chaguaramas, Trinidad',
+      contactNumber: '+1-868-634-4349',
+      whatsappNumber: '18686344349',
+      amenities: ['Clubhouse', 'Restaurant', 'Bar', 'Scenic Views', 'Public Access'],
+      description:
+          'A public 9-hole golf course managed by the Chaguaramas Development Authority, '
+          'offering affordable golf with scenic views of the Gulf of Paria. '
+          'One of Trinidad\'s most accessible courses.',
+      rates: CourseRates(
+        local: const RateTier(weekday: 200, weekend: 280),
+        tourist: const RateTier(weekday: 30, weekend: 45),
+        notes: '9-hole public course. No booking required for weekday rounds.',
+      ),
+    ),
   ];
 
   static final List<Tournament> tournaments = [

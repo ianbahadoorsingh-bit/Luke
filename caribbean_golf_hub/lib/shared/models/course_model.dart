@@ -123,4 +123,36 @@ class GolfCourse {
         'isActive': isActive,
         'updatedAt': FieldValue.serverTimestamp(),
       };
+
+  factory GolfCourse.fromJson(Map<String, dynamic> map) => GolfCourse(
+        id: map['id'] as String? ?? '',
+        name: map['name'] as String? ?? '',
+        location: map['location'] as String? ?? '',
+        mapLink: map['mapLink'] as String?,
+        latitude: (map['latitude'] as num?)?.toDouble(),
+        longitude: (map['longitude'] as num?)?.toDouble(),
+        contactNumber: map['contactNumber'] as String? ?? '',
+        whatsappNumber: map['whatsappNumber'] as String? ?? '',
+        amenities: List<String>.from(map['amenities'] as List? ?? []),
+        imageUrl: map['imageUrl'] as String?,
+        description: map['description'] as String? ?? '',
+        rates: CourseRates.fromMap((map['rates'] as Map<String, dynamic>?) ?? {}),
+        isActive: map['isActive'] as bool? ?? true,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'location': location,
+        if (mapLink != null) 'mapLink': mapLink,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+        'contactNumber': contactNumber,
+        'whatsappNumber': whatsappNumber,
+        'amenities': amenities,
+        if (imageUrl != null) 'imageUrl': imageUrl,
+        'description': description,
+        'rates': rates.toMap(),
+        'isActive': isActive,
+      };
 }

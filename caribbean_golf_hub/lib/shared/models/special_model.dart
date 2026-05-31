@@ -80,4 +80,38 @@ class GolfSpecial {
         'publishedAt': FieldValue.serverTimestamp(),
         'notificationSent': false,
       };
+
+  factory GolfSpecial.fromJson(Map<String, dynamic> map) => GolfSpecial(
+        id: map['id'] as String? ?? '',
+        courseId: map['courseId'] as String? ?? '',
+        courseName: map['courseName'] as String? ?? '',
+        title: map['title'] as String? ?? '',
+        description: map['description'] as String? ?? '',
+        imageUrl: map['imageUrl'] as String?,
+        validFrom: DateTime.parse(map['validFrom'] as String),
+        validTo: DateTime.parse(map['validTo'] as String),
+        price: (map['price'] as num?)?.toDouble() ?? 0,
+        originalPrice: (map['originalPrice'] as num?)?.toDouble(),
+        currency: map['currency'] as String? ?? 'TTD',
+        tags: List<String>.from(map['tags'] as List? ?? []),
+        isActive: map['isActive'] as bool? ?? true,
+        publishedAt: DateTime.parse(map['publishedAt'] as String),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'courseId': courseId,
+        'courseName': courseName,
+        'title': title,
+        'description': description,
+        if (imageUrl != null) 'imageUrl': imageUrl,
+        'validFrom': validFrom.toIso8601String(),
+        'validTo': validTo.toIso8601String(),
+        'price': price,
+        if (originalPrice != null) 'originalPrice': originalPrice,
+        'currency': currency,
+        'tags': tags,
+        'isActive': isActive,
+        'publishedAt': publishedAt.toIso8601String(),
+      };
 }

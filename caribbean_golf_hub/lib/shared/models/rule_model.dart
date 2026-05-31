@@ -44,6 +44,30 @@ class GolfRule {
         'order': order,
         'tags': tags,
       };
+
+  factory GolfRule.fromJson(Map<String, dynamic> map) => GolfRule(
+        id: map['id'] as String? ?? '',
+        category: map['category'] as String? ?? '',
+        title: map['title'] as String? ?? '',
+        ruleNumber: map['ruleNumber'] as String? ?? '',
+        summary: map['summary'] as String? ?? '',
+        content: map['content'] as String? ?? '',
+        imageUrls: List<String>.from(map['imageUrls'] as List? ?? []),
+        order: map['order'] as int? ?? 0,
+        tags: List<String>.from(map['tags'] as List? ?? []),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'category': category,
+        'title': title,
+        'ruleNumber': ruleNumber,
+        'summary': summary,
+        'content': content,
+        'imageUrls': imageUrls,
+        'order': order,
+        'tags': tags,
+      };
 }
 
 /// Predefined rule categories with icons
