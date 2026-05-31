@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_strings.dart';
 import '../../shared/models/rule_model.dart';
-import '../../shared/services/firestore_service.dart';
 import '../../shared/widgets/caribbean_app_bar.dart';
-import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../../shared/services/mock_data.dart';
+import '../../shared/services/data_store.dart';
 import 'rule_detail_screen.dart';
 
 class RulesScreen extends StatefulWidget {
@@ -190,31 +188,38 @@ class _RulesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final allRules = MockData.rules;
-    final filtered = searchQuery.isEmpty
-        ? allRules
-        : allRules
-            .where((r) =>
-                r.title.toLowerCase().contains(searchQuery) ||
-                r.category.toLowerCase().contains(searchQuery) ||
-                r.summary.toLowerCase().contains(searchQuery))
-            .toList();
+    return StreamBuilder<List<GolfRule>>(
+      initialData: DataStore.instance.rules,
+      stream: DataStore.instance.watchRules(),
+      builder: (context, snap) {
+        final allRules = snap.data ?? [];
+        final filtered = searchQuery.isEmpty
+            ? allRules
+            : allRules
+                .where((r) =>
+                    r.title.toLowerCase().contains(searchQuery) ||
+                    r.category.toLowerCase().contains(searchQuery) ||
+                    r.summary.toLowerCase().contains(searchQuery))
+                .toList();
 
-    if (filtered.isEmpty) {
-      return const EmptyState(emoji: '📖', title: 'No rules found');
-    }
+        if (filtered.isEmpty) {
+          return const EmptyState(emoji: '📖', title: 'No rules found');
+        }
 
-    final grouped = <String, List<GolfRule>>{};
-    for (final rule in filtered) {
-      grouped.putIfAbsent(rule.category, () => []).add(rule);
-    }
+        final grouped = <String, List<GolfRule>>{};
+        for (final rule in filtered) {
+          grouped.putIfAbsent(rule.category, () => []).add(rule);
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: grouped.length,
-      itemBuilder: (context, i) {
-        final category = grouped.keys.elementAt(i);
-        return _CategorySection(category: category, rules: grouped[category]!);
+        return ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          itemCount: grouped.length,
+          itemBuilder: (context, i) {
+            final category = grouped.keys.elementAt(i);
+            return _CategorySection(
+                category: category, rules: grouped[category]!);
+          },
+        );
       },
     );
   }

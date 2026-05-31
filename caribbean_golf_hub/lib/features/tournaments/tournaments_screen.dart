@@ -9,7 +9,7 @@ import '../../shared/widgets/caribbean_app_bar.dart';
 import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/amenity_chip.dart';
-import '../../shared/services/mock_data.dart';
+import '../../shared/services/data_store.dart';
 import 'tournament_detail_screen.dart';
 
 class TournamentsScreen extends StatefulWidget {
@@ -299,17 +299,26 @@ class _MockTournamentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = MockData.tournaments
-        .where((t) => country == null || t.country == country)
-        .toList();
-    if (list.isEmpty) {
-      return const EmptyState(emoji: '🏆', title: 'No upcoming tournaments');
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: list.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (_, i) => TournamentCard(tournament: list[i]),
+    return StreamBuilder<List<Tournament>>(
+      initialData: country == null
+          ? DataStore.instance.tournaments
+          : DataStore.instance.tournaments
+              .where((t) => t.country == country)
+              .toList(),
+      stream: DataStore.instance.watchTournaments(country: country),
+      builder: (context, snap) {
+        final list = snap.data ?? [];
+        if (list.isEmpty) {
+          return const EmptyState(
+              emoji: '🏆', title: 'No upcoming tournaments');
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: list.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 14),
+          itemBuilder: (_, i) => TournamentCard(tournament: list[i]),
+        );
+      },
     );
   }
 }

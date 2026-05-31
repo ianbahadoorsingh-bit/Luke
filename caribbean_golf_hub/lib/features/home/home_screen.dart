@@ -5,6 +5,7 @@ import '../courses/courses_list_screen.dart';
 import '../tournaments/tournaments_screen.dart';
 import '../specials/specials_screen.dart';
 import '../rules/rules_screen.dart';
+import '../scoring/scoring_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool useMockData;
@@ -23,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
     TournamentsScreen(useMockData: widget.useMockData),
     SpecialsScreen(useMockData: widget.useMockData),
     const RulesScreen(),
+    const ScoringScreen(),
   ];
 
   @override
@@ -53,6 +55,11 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.menu_book),
             label: AppStrings.navRules,
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sports_score_outlined),
+            activeIcon: Icon(Icons.sports_score),
+            label: 'Scoring',
+          ),
         ],
       ),
     );
@@ -77,14 +84,16 @@ class AppHeroHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.sports_golf, color: AppColors.accentGold, size: 28),
+              const Icon(Icons.sports_golf,
+                  color: AppColors.accentGold, size: 28),
               const SizedBox(width: 10),
               Text(
                 AppStrings.appName,
-                style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.w800,
-                    ),
+                style:
+                    Theme.of(context).textTheme.headlineLarge?.copyWith(
+                          color: AppColors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
               ),
             ],
           ),

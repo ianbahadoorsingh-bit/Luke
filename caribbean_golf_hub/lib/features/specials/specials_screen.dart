@@ -10,7 +10,7 @@ import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/gold_badge.dart';
 import '../../shared/widgets/amenity_chip.dart';
-import '../../shared/services/mock_data.dart';
+import '../../shared/services/data_store.dart';
 
 class SpecialsScreen extends StatelessWidget {
   final bool useMockData;
@@ -26,11 +26,25 @@ class SpecialsScreen extends StatelessWidget {
         showGoldAccent: true,
       ),
       body: useMockData
-          ? ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: MockData.specials.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 14),
-              itemBuilder: (_, i) => _SpecialCard(special: MockData.specials[i]),
+          ? StreamBuilder<List<GolfSpecial>>(
+              initialData: DataStore.instance.specials,
+              stream: DataStore.instance.watchSpecials(),
+              builder: (context, snap) {
+                final specials = snap.data ?? [];
+                if (specials.isEmpty) {
+                  return const EmptyState(
+                    emoji: '🏌️',
+                    title: 'No active specials',
+                    subtitle: 'Enable notifications to be the first to know!',
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: specials.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 14),
+                  itemBuilder: (_, i) => _SpecialCard(special: specials[i]),
+                );
+              },
             )
           : StreamBuilder<List<GolfSpecial>>(
               stream: FirestoreService.instance.watchActiveSpecials(),

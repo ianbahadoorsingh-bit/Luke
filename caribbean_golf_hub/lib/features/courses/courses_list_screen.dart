@@ -8,7 +8,7 @@ import '../../shared/widgets/caribbean_app_bar.dart';
 import '../../shared/widgets/amenity_chip.dart';
 import '../../shared/widgets/loading_shimmer.dart';
 import '../../shared/widgets/empty_state.dart';
-import '../../shared/services/mock_data.dart';
+import '../../shared/services/data_store.dart';
 import 'course_detail_screen.dart';
 
 class CoursesListScreen extends StatefulWidget {
@@ -37,6 +37,14 @@ class _CoursesListScreenState extends State<CoursesListScreen> {
         title: AppStrings.coursesTitle,
         subtitle: AppStrings.coursesSubtitle,
         showGoldAccent: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings_outlined,
+                color: Colors.white),
+            tooltip: 'Admin',
+            onPressed: () => Navigator.pushNamed(context, '/admin'),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -329,20 +337,26 @@ class _MockCourseList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final courses = MockData.courses
-        .where((c) =>
-            searchQuery.isEmpty ||
-            c.name.toLowerCase().contains(searchQuery) ||
-            c.location.toLowerCase().contains(searchQuery))
-        .toList();
-    if (courses.isEmpty) {
-      return const EmptyState(emoji: '⛳', title: 'No courses found');
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: courses.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, i) => _CourseCard(course: courses[i]),
+    return StreamBuilder<List<GolfCourse>>(
+      initialData: DataStore.instance.courses,
+      stream: DataStore.instance.watchCourses(),
+      builder: (context, snap) {
+        final courses = (snap.data ?? [])
+            .where((c) =>
+                searchQuery.isEmpty ||
+                c.name.toLowerCase().contains(searchQuery) ||
+                c.location.toLowerCase().contains(searchQuery))
+            .toList();
+        if (courses.isEmpty) {
+          return const EmptyState(emoji: '⛳', title: 'No courses found');
+        }
+        return ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: courses.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, i) => _CourseCard(course: courses[i]),
+        );
+      },
     );
   }
 }
